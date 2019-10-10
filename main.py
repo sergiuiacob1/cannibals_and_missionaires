@@ -3,6 +3,8 @@
 c = 3
 m = 3
 cb = 2
+randomStrategyIterations = 10
+noOfTransitionsWithoutSuccess = 100
 
 
 class State:
@@ -13,6 +15,9 @@ class State:
         self.m2 = m2
         self.pb = pb
         self.visited = False
+
+    def isFinal(self):
+        return self.c1 == 0 and self.m1 == 0
 
 
 class Transition:
@@ -33,3 +38,19 @@ def makeTransition(state, transition):
     if state.pb == 1:
         return State(state.c1 - transition.c, state.m1 - transition.m, state.c2 + transition.c, state.m2 + transition.m, 2)
     return State(state.c1 + transition.c, state.m1 + transition.m, state.c2 - transition.c, state.m2 - transition.m, 1)
+
+
+def randomStrategy():
+    for i in range(randomStrategyIterations):
+        currentState = getInitialState()        
+        while (currentState.isFinal() == False):
+            transition = getRandomTransition(currentState)
+            # se asigura ca returneaza o tranzitie valida
+            if transition is None:
+                # Nu mai pot face nicio mutare
+                break
+            ...
+
+
+def main():
+    randomStrategy()
