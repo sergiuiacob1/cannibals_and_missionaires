@@ -72,8 +72,6 @@ def makeTransition(state, transition):
 
 def getRandomTransition(State):
 
-    tranzition = Transition(0, 0)
-
     if State.pb == 1:
         cannibals = State.c1
         missionaires = State.m1
@@ -87,59 +85,59 @@ def getRandomTransition(State):
     mr = random.randint(cr, min(missionaires, cb-cr))
     return Transition(cr, mr)
 
-    if cannibals >= cb:
-        cr = random.randint(0, cb)
-        if cr == cb:
-            tranzition.c = cr
-            tranzition.m = 0
-            return tranzition
-        elif cr == 0:
-            if missionaires > cb:
-                tranzition.c = 0
-                tranzition.m = cb-cr
-                return tranzition
-            if missionaires >= 1 and missionaires <= cb:
-                tranzition.c = 0
-                tranzition.m = missionaires
-                return tranzition
-        else:
-            tranzition.c = cr
-            if missionaires >= cb-cr:
-                tranzition.m = cb - cr
-                return tranzition
-            else:
-                tranzition.m = missionaires
+    # if cannibals >= cb:
+    #     cr = random.randint(0, cb)
+    #     if cr == cb:
+    #         tranzition.c = cr
+    #         tranzition.m = 0
+    #         return tranzition
+    #     elif cr == 0:
+    #         if missionaires > cb:
+    #             tranzition.c = 0
+    #             tranzition.m = cb-cr
+    #             return tranzition
+    #         if missionaires >= 1 and missionaires <= cb:
+    #             tranzition.c = 0
+    #             tranzition.m = missionaires
+    #             return tranzition
+    #     else:
+    #         tranzition.c = cr
+    #         if missionaires >= cb-cr:
+    #             tranzition.m = cb - cr
+    #             return tranzition
+    #         else:
+    #             tranzition.m = missionaires
 
-    if cannibals < cb and cannibals > 0:
-        cr = random.randint(0, cannibals)
-        if cr == 0:
-            if missionaires >= cb:
-                tranzition.c = 0
-                tranzition.m = cb-cr
-                return tranzition
-            if missionaires >= 1 and missionaires <= cb:
-                tranzition.c = 0
-                tranzition.m = missionaires
-                return tranzition
-        else:
-            tranzition.c = cr
-            if missionaires >= cb-cr:
-                tranzition.m = cb - cr
-                return tranzition
-            else:
-                tranzition.m = missionaires
+    # if cannibals < cb and cannibals > 0:
+    #     cr = random.randint(0, cannibals)
+    #     if cr == 0:
+    #         if missionaires >= cb:
+    #             tranzition.c = 0
+    #             tranzition.m = cb-cr
+    #             return tranzition
+    #         if missionaires >= 1 and missionaires <= cb:
+    #             tranzition.c = 0
+    #             tranzition.m = missionaires
+    #             return tranzition
+    #     else:
+    #         tranzition.c = cr
+    #         if missionaires >= cb-cr:
+    #             tranzition.m = cb - cr
+    #             return tranzition
+    #         else:
+    #             tranzition.m = missionaires
 
-    if cannibals == 0:
-        if missionaires <= cb and missionaires > 0:
-            cr = random.randint(1, missionaires)
-            tranzition.c = 0
-            tranzition.m = cr
-            return tranzition
-        if missionaires > cb:
-            cr = random.randint(1, cb)
-            tranzition.c = 0
-            tranzition.m = cr
-            return tranzition
+    # if cannibals == 0:
+    #     if missionaires <= cb and missionaires > 0:
+    #         cr = random.randint(1, missionaires)
+    #         tranzition.c = 0
+    #         tranzition.m = cr
+    #         return tranzition
+    #     if missionaires > cb:
+    #         cr = random.randint(1, cb)
+    #         tranzition.c = 0
+    #         tranzition.m = cr
+    #         return tranzition
 
 
 def randomStrategy():
@@ -153,17 +151,18 @@ def randomStrategy():
                 currentState = makeTransition(currentState, tran)
 
             elif currentState.isFinal() == True:
-                print("Rezolvat: ", currentState.c1, currentState.m1,
-                      currentState.c2, currentState.m2)
+                print("Resolved at iteration ",i+1," -> c1: ", currentState.c1,
+              ", m1: ",currentState.m1,", c2: ", currentState.c2,", m2: ", currentState.m2, ", pb: ", currentState.pb)
                 done = True
                 break
-        print("Moment", i, ":", currentState.c1,
-              currentState.m1, currentState.c2, currentState.m2)
+        if currentState.isFinal()== False:
+            print("Iteration", i+1, "-> c1: ", currentState.c1,
+                  ", m1: ",currentState.m1,", c2: ", currentState.c2,", m2: ", currentState.m2, ", pb: ", currentState.pb)
         if done is True:
             break
 
     if currentState.isFinal() == False:
-        print("Nu s-a gasit nicio rezolvare !")
+        print("Nu s-a gasit nicio rezolvare !\n")
 
 
 def backtrackingStrategy(state, transitionsDone=[], done=[False]):
@@ -260,30 +259,36 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
 
 def main():
     global states, M
+    print(' Random Strategy: \n')
     randomStrategy()
 
-    # states = buildPossibleStates()
-    # initialState = ([state for state in states if state.c1 ==
-    #                  c and state.m1 == m and state.pb == 1])[0]
-    # print(f'Initial state: {initialState}')
-    # transitionsDone = backtrackingStrategy(initialState)
-    # if transitionsDone is not None:
-    #     for transition in transitionsDone:
-    #         print(transition)
+    print('\n Backtracking Strategy: \n')
 
-    # states = buildPossibleStates()
-    # M = buildEdgesBetweenStates(states)
-    # indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
-    #                         c and state.m1 == m and state.pb == 1])[0]
+    states = buildPossibleStates()
+    initialState = ([state for state in states if state.c1 ==
+                     c and state.m1 == m and state.pb == 1])[0]
+    print(f'Initial state: {initialState}')
+    transitionsDone = backtrackingStrategy(initialState)
+    if transitionsDone is not None:
+        for transition in transitionsDone:
+            initialState = makeTransition(initialState,transition)
+            print(initialState)
 
-    # for i in range(0, maxTreeDepth):
-    #     statesTraversed = [states[indexOfInitialState]]
-    #     DFS(i, indexOfInitialState, statesTraversed)
-    #     if statesTraversed[-1].isFinal():
-    #         print(f'Reached final state with limit: {i}')
-    #         for state in statesTraversed:
-    #             print(state)
-    #         break
+    print('\n IDDFS Strategy: \n')
+
+    states = buildPossibleStates()
+    M = buildEdgesBetweenStates(states)
+    indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
+                            c and state.m1 == m and state.pb == 1])[0]
+
+    for i in range(0, maxTreeDepth):
+        statesTraversed = [states[indexOfInitialState]]
+        DFS(i, indexOfInitialState, statesTraversed)
+        if statesTraversed[-1].isFinal():
+            print(f'Reached final state with limit: {i}')
+            for state in statesTraversed:
+                print(state)
+            break
 
 
 main()
