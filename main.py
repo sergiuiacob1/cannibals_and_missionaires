@@ -250,17 +250,17 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
     for index in M[stateIndex]:
         if states[index].visited == False:
             statesTraversed.append(states[index])
-            DFS(limit+1, index, statesTraversed, done)
+            DFS(limit-1, index, statesTraversed, done)
             if done[0] == True:
                 break
             statesTraversed = statesTraversed[:-1]
-            # states[index].visited = False
+            states[index].visited = False
     return
 
 
 def main():
     global states, M
-    # randomStrategy()
+    randomStrategy()
 
     # states = buildPossibleStates()
     # initialState = ([state for state in states if state.c1 ==
@@ -271,19 +271,19 @@ def main():
     #     for transition in transitionsDone:
     #         print(transition)
 
-    states = buildPossibleStates()
-    M = buildEdgesBetweenStates(states)
-    indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
-                            c and state.m1 == m and state.pb == 1])[0]
+    # states = buildPossibleStates()
+    # M = buildEdgesBetweenStates(states)
+    # indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
+    #                         c and state.m1 == m and state.pb == 1])[0]
 
-    for i in range(0, maxTreeDepth):
-        statesTraversed = [states[indexOfInitialState]]
-        DFS(i, indexOfInitialState, statesTraversed)
-        if statesTraversed[-1].isFinal():
-            print(f'Reached final state with limit: {i}')
-            for state in statesTraversed:
-                print(state)
-            break
+    # for i in range(0, maxTreeDepth):
+    #     statesTraversed = [states[indexOfInitialState]]
+    #     DFS(i, indexOfInitialState, statesTraversed)
+    #     if statesTraversed[-1].isFinal():
+    #         print(f'Reached final state with limit: {i}')
+    #         for state in statesTraversed:
+    #             print(state)
+    #         break
 
 
 main()
