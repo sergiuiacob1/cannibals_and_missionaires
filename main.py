@@ -238,17 +238,19 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
 
     states[stateIndex].visited = True
 
+    if states[stateIndex].isFinal():
+        # hip hip hooray
+        print(f'Reached final state: {states[stateIndex]}')
+        done[0] = True
+        return
+
     if limit == 0:
-        if states[stateIndex].isFinal():
-            # hip hip hooray
-            print(f'Reached final state: {states[stateIndex]}')
-            done[0] = True
         return
 
     for index in M[stateIndex]:
         if states[index].visited == False:
             statesTraversed.append(states[index])
-            DFS(limit-1, index, statesTraversed, done)
+            DFS(limit+1, index, statesTraversed, done)
             if done[0] == True:
                 break
             statesTraversed = statesTraversed[:-1]
@@ -274,12 +276,14 @@ def main():
     indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
                             c and state.m1 == m and state.pb == 1])[0]
 
-    if True is True:
-        i = maxTreeDepth
+    for i in range(0, maxTreeDepth):
         statesTraversed = [states[indexOfInitialState]]
         DFS(i, indexOfInitialState, statesTraversed)
-        for state in statesTraversed:
-            print(state)
+        if statesTraversed[-1].isFinal():
+            print(f'Reached final state with limit: {i}')
+            for state in statesTraversed:
+                print(state)
+            break
 
 
 main()
