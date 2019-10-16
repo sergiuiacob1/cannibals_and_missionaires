@@ -85,60 +85,6 @@ def getRandomTransition(State):
     mr = random.randint(cr, min(missionaires, cb-cr))
     return Transition(cr, mr)
 
-    # if cannibals >= cb:
-    #     cr = random.randint(0, cb)
-    #     if cr == cb:
-    #         tranzition.c = cr
-    #         tranzition.m = 0
-    #         return tranzition
-    #     elif cr == 0:
-    #         if missionaires > cb:
-    #             tranzition.c = 0
-    #             tranzition.m = cb-cr
-    #             return tranzition
-    #         if missionaires >= 1 and missionaires <= cb:
-    #             tranzition.c = 0
-    #             tranzition.m = missionaires
-    #             return tranzition
-    #     else:
-    #         tranzition.c = cr
-    #         if missionaires >= cb-cr:
-    #             tranzition.m = cb - cr
-    #             return tranzition
-    #         else:
-    #             tranzition.m = missionaires
-
-    # if cannibals < cb and cannibals > 0:
-    #     cr = random.randint(0, cannibals)
-    #     if cr == 0:
-    #         if missionaires >= cb:
-    #             tranzition.c = 0
-    #             tranzition.m = cb-cr
-    #             return tranzition
-    #         if missionaires >= 1 and missionaires <= cb:
-    #             tranzition.c = 0
-    #             tranzition.m = missionaires
-    #             return tranzition
-    #     else:
-    #         tranzition.c = cr
-    #         if missionaires >= cb-cr:
-    #             tranzition.m = cb - cr
-    #             return tranzition
-    #         else:
-    #             tranzition.m = missionaires
-
-    # if cannibals == 0:
-    #     if missionaires <= cb and missionaires > 0:
-    #         cr = random.randint(1, missionaires)
-    #         tranzition.c = 0
-    #         tranzition.m = cr
-    #         return tranzition
-    #     if missionaires > cb:
-    #         cr = random.randint(1, cb)
-    #         tranzition.c = 0
-    #         tranzition.m = cr
-    #         return tranzition
-
 
 def randomStrategy():
     done = False
