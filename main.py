@@ -4,7 +4,7 @@ c = 3
 m = 3
 cb = 2
 randomStrategyIterations = 10
-noOfTransitionsWithoutSuccess = 200
+noOfTransitionsWithoutSuccess = 100
 maxTreeDepth = 999
 
 
@@ -90,11 +90,14 @@ def randomStrategy():
     done = False
     for i in range(randomStrategyIterations):
         currentState = getInitialState()
+        currentState.visited = True
         for _ in range(noOfTransitionsWithoutSuccess):
             tran = getRandomTransition(currentState)
 
             if isTransitionValid(tran) == True:
-                currentState = makeTransition(currentState, tran)
+                if makeTransition(currentState,tran).visited==False:
+                    currentState = makeTransition(currentState, tran)
+                    currentState.visited = True
 
             elif currentState.isFinal() == True:
                 print("Resolved at iteration ",i+1," -> c1: ", currentState.c1,
