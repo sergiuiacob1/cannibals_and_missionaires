@@ -95,18 +95,18 @@ def randomStrategy():
             tran = getRandomTransition(currentState)
 
             if isTransitionValid(tran) == True:
-                if makeTransition(currentState,tran).visited==False:
+                if makeTransition(currentState, tran).visited == False:
                     currentState = makeTransition(currentState, tran)
                     currentState.visited = True
 
             elif currentState.isFinal() == True:
-                print("Resolved at iteration ",i+1," -> c1: ", currentState.c1,
-              ", m1: ",currentState.m1,", c2: ", currentState.c2,", m2: ", currentState.m2, ", pb: ", currentState.pb)
+                print("Resolved at iteration ", i+1, " -> c1: ", currentState.c1,
+                      ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
                 done = True
                 break
-        if currentState.isFinal()== False:
+        if currentState.isFinal() == False:
             print("Iteration", i+1, "-> c1: ", currentState.c1,
-                  ", m1: ",currentState.m1,", c2: ", currentState.c2,", m2: ", currentState.m2, ", pb: ", currentState.pb)
+                  ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
         if done is True:
             break
 
@@ -206,13 +206,8 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
     return
 
 
-def main():
-    global states, M
-    print(' Random Strategy: \n')
-    randomStrategy()
-
-    print('\n Backtracking Strategy: \n')
-
+def solveWithBacktrackingStrategy():
+    global states
     states = buildPossibleStates()
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
@@ -220,11 +215,12 @@ def main():
     transitionsDone = backtrackingStrategy(initialState)
     if transitionsDone is not None:
         for transition in transitionsDone:
-            initialState = makeTransition(initialState,transition)
+            initialState = makeTransition(initialState, transition)
             print(initialState)
 
-    print('\n IDDFS Strategy: \n')
 
+def solveWithIDDFSStrategy():
+    global states, M
     states = buildPossibleStates()
     M = buildEdgesBetweenStates(states)
     indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
@@ -238,6 +234,15 @@ def main():
             for state in statesTraversed:
                 print(state)
             break
+
+
+def main():
+    print(' Random Strategy: \n')
+    randomStrategy()
+    print('\n Backtracking Strategy: \n')
+    solveWithBacktrackingStrategy()
+    print('\n IDDFS Strategy: \n')
+    solveWithIDDFSStrategy()
 
 
 main()
