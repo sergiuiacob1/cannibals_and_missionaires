@@ -1,8 +1,8 @@
 import random
 
-c = 3
-m = 3
-cb = 2
+c = 4
+m = 4
+cb = 3
 randomStrategyIterations = 10
 noOfTransitionsWithoutSuccess = 100
 maxTreeDepth = 999
@@ -137,7 +137,7 @@ def backtrackingStrategy(state, transitionsDone=[], done=[False]):
                 return transitionsDone
             transitionsDone = transitionsDone[:-1]
             # Stie Iustina sa explice
-            # newState.visited = False
+            newState.visited = False
 
 
 def buildTransitionBetweenStates(state1, state2):
@@ -200,10 +200,9 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
             statesTraversed.append(states[index])
             DFS(limit-1, index, statesTraversed, done)
             if done[0] == True:
-                break
+                return
             statesTraversed = statesTraversed[:-1]
             states[index].visited = False
-    return
 
 
 def solveWithBacktrackingStrategy():
