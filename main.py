@@ -1,10 +1,10 @@
 import random
 
-c = 4
-m = 4
-cb = 3
+c = 3
+m = 3
+cb = 2
 randomStrategyIterations = 10
-noOfTransitionsWithoutSuccess = 100
+noOfTransitionsWithoutSuccess = 10
 maxTreeDepth = 999
 
 
@@ -31,7 +31,7 @@ class State:
         return f'c1: {self.c1}, m1: {self.m1}, c2: {self.c2}, m2: {self.m2}, pb: {self.pb}'
 
     def __eq__(self, other):
-        return self.c1 == other.c1 and self.m1 == other.m1 and self.c2 == other.c2 and self.m2 == other.c2 and self.pb == other.pb and self.visited == other.visited
+        return self.c1 == other.c1 and self.m1 == other.m1 and self.c2 == other.c2 and self.m2 == other.m2 and self.pb == other.pb
 
 
 class Transition:
@@ -71,7 +71,6 @@ def makeTransition(state, transition):
 
 
 def getRandomTransition(State):
-
     if State.pb == 1:
         cannibals = State.c1
         missionaires = State.m1
@@ -87,34 +86,55 @@ def getRandomTransition(State):
 
 
 def randomStrategy():
-    done = False
+    states = buildPossibleStates()
+
     for i in range(randomStrategyIterations):
-        currentState = getInitialState()
+        print(f'Iteration {i}...')
+        # Iau o referinta direct catre acel obiect din states
+        # O noua iteratie, setez toate visited pe False
+        for state in states:
+            state.visited = False
+        currentState = ([state for state in states if state.c1 ==
+                         c and state.m1 == m and state.pb == 1])[0]
         currentState.visited = True
+        statesTraversed = [currentState]
         for _ in range(noOfTransitionsWithoutSuccess):
-            tran = getRandomTransition(currentState)
+            # Aleg o stare random
+            transition = getRandomTransition(currentState)
+            resultingState = makeTransition(currentState, transition)
+            if resultingState.isValid() == False:
+                continue
 
-            if isTransitionValid(tran) == True:
-                if makeTransition(currentState, tran).visited == False:
-                    currentState = makeTransition(currentState, tran)
-                    currentState.visited = True
+            stateInStatesList = [
+                state for state in states if state == resultingState]
+            stateInStatesList = stateInStatesList[0]
+            stateInStatesList.visited = True
+            statesTraversed.append(stateInStatesList)
+            currentState = stateInStatesList
+            # randomState = random.choice(states)
+            # if randomState.visited == True:
+            #     continue
+            # # Incerc sa vad daca am tranzitie catre starea asta
+            # transition = buildTransitionBetweenStates(
+            #     currentState, randomState)
+            # if isTransitionValid(transition):
+            #     # woo!
+            #     statesTraversed.append(randomState)
+            #     currentState = randomState
 
-            elif currentState.isFinal() == True:
-                print("Resolved at iteration ", i+1, " -> c1: ", currentState.c1,
-                      ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
-                done = True
-                break
-        if currentState.isFinal() == False:
-            print("Iteration", i+1, "-> c1: ", currentState.c1,
-                  ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
-        if done is True:
-            break
+            if currentState.isFinal() == True:
+                print('Found solution with random strategy:')
+                for state in statesTraversed:
+                    print(state)
+                # print("Resolved at iteration ", i+1, " -> c1: ", currentState.c1,
+                #       ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
+                return
 
     if currentState.isFinal() == False:
-        print("Nu s-a gasit nicio rezolvare !\n")
+        print("Nu s-a gasit nicio rezolvare!\n")
 
 
-def backtrackingStrategy(state, transitionsDone=[], done=[False]):
+def backtrackingStrategy(state, statesTraversed=[], done=[False]):
     global states
 
     state.visited = True
@@ -122,21 +142,20 @@ def backtrackingStrategy(state, transitionsDone=[], done=[False]):
     if state.isFinal():
         print(f'Reached a final state: {state}')
         done[0] = True
-        return transitionsDone
+
     if done[0] == True:
-        return transitionsDone
+        return
 
     for newState in states:
         if newState.visited == True:
             continue
         transition = buildTransitionBetweenStates(state, newState)
         if isTransitionValid(transition):
-            transitionsDone.append(transition)
-            backtrackingStrategy(newState, transitionsDone, done)
+            statesTraversed.append(newState)
+            backtrackingStrategy(newState, statesTraversed, done)
             if (done[0] == True):
-                return transitionsDone
-            transitionsDone = transitionsDone[:-1]
-            # Stie Iustina sa explice
+                return statesTraversed
+            statesTraversed.pop(len(statesTraversed) - 1)
             newState.visited = False
 
 
@@ -190,18 +209,17 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
         # hip hip hooray
         print(f'Reached final state: {states[stateIndex]}')
         done[0] = True
-        return
 
     if limit == 0:
         return
 
-    for index in M[stateIndex]:
+    for index in M[stateIndex][::-1]:
         if states[index].visited == False:
             statesTraversed.append(states[index])
             DFS(limit-1, index, statesTraversed, done)
             if done[0] == True:
                 return
-            statesTraversed = statesTraversed[:-1]
+            statesTraversed.pop(len(statesTraversed) - 1)
             states[index].visited = False
 
 
@@ -211,11 +229,10 @@ def solveWithBacktrackingStrategy():
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
     print(f'Initial state: {initialState}')
-    transitionsDone = backtrackingStrategy(initialState)
-    if transitionsDone is not None:
-        for transition in transitionsDone:
-            initialState = makeTransition(initialState, transition)
-            print(initialState)
+    statesTraversed = backtrackingStrategy(initialState, [initialState])
+    if statesTraversed[-1].isFinal():
+        for state in statesTraversed:
+            print(state)
 
 
 def solveWithIDDFSStrategy():
@@ -236,12 +253,12 @@ def solveWithIDDFSStrategy():
 
 
 def main():
-    print(' Random Strategy: \n')
+    print('Random Strategy: \n')
     randomStrategy()
-    print('\n Backtracking Strategy: \n')
-    solveWithBacktrackingStrategy()
-    print('\n IDDFS Strategy: \n')
-    solveWithIDDFSStrategy()
+    # print('\nBacktracking Strategy: \n')
+    # solveWithBacktrackingStrategy()
+    # print('\nIDDFS Strategy: \n')
+    # solveWithIDDFSStrategy()
 
 
 main()
