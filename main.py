@@ -1,8 +1,10 @@
 import random
 import math
+import timeit
+import time
 
-c = 6
-m = 6
+c = 3
+m = 3
 cb = 2
 randomStrategyIterations = 10
 noOfTransitionsWithoutSuccess = 10
@@ -88,6 +90,7 @@ def getRandomTransition(State):
 
 def randomStrategy():
     states = buildPossibleStates()
+    print(f'I have a total of {len(states)} states')
 
     for i in range(randomStrategyIterations):
         print(f'Iteration {i}...')
@@ -201,29 +204,6 @@ def buildEdgesBetweenStates(states):
     return M
 
 
-def DFS(limit, stateIndex, statesTraversed, done=[False]):
-    global states, M
-
-    states[stateIndex].visited = True
-
-    if states[stateIndex].isFinal():
-        # hip hip hooray
-        print(f'Reached final state: {states[stateIndex]}')
-        done[0] = True
-
-    if limit == 0:
-        return
-
-    for index in M[stateIndex][::-1]:
-        if states[index].visited == False:
-            statesTraversed.append(states[index])
-            DFS(limit-1, index, statesTraversed, done)
-            if done[0] == True:
-                return
-            statesTraversed.pop(len(statesTraversed) - 1)
-            states[index].visited = False
-
-
 def solveWithBacktrackingStrategy():
     global states
     states = buildPossibleStates()
@@ -245,21 +225,46 @@ def solveWithIDDFSStrategy():
     indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
                             c and state.m1 == m and state.pb == 1])[0]
 
-    for i in range(0, maxTreeDepth):
-        statesTraversed = [states[indexOfInitialState]]
+    states[indexOfInitialState].visited = True
+    for i in range(1, maxTreeDepth):
+        statesTraversed = [indexOfInitialState]
         DFS(i, indexOfInitialState, statesTraversed)
-        if statesTraversed[-1].isFinal():
+        if states[statesTraversed[-1]].isFinal():
             print(f'Reached final state with limit: {i}')
-            for state in statesTraversed:
-                print(state)
+            for stateIndex in statesTraversed:
+                print(states[stateIndex])
             return
 
     print('IDDFS did not find a solution :(')
 
 
+def DFS(limit, stateIndex, statesTraversed, done=[False]):
+    global states, M
+
+    if states[stateIndex].isFinal():
+        print('Reached final state')
+        done[0] = True
+        return
+
+    if limit == 0:
+        return
+
+    for neighbourIndex in M[stateIndex]:
+        if states[neighbourIndex].visited == False:
+            states[neighbourIndex].visited = True
+            statesTraversed.append(neighbourIndex)
+            DFS(limit - 1, neighbourIndex, statesTraversed, done)
+
+            if done[0] == True:
+                return
+
+            states[neighbourIndex].visited = False
+            statesTraversed.pop(len(statesTraversed) - 1)
+
+
 def heuristic(state, finalState=State(0, 0, c, m, 2)):
     return 0
-    # ceva mai destept
+    return (state.c1 + state.m1)//cb
 
 
 def astarStrategy():
@@ -279,7 +284,7 @@ def astarStrategy():
         indexStateIsInQ[currentStateIndex] = False
         for neighbourIndex in M[currentStateIndex]:
             # fac update la vecini
-            if d[currentStateIndex] + 1 <= d[neighbourIndex]:
+            if d[currentStateIndex] + 1 < d[neighbourIndex]:
                 d[neighbourIndex] = d[currentStateIndex] + 1
                 if indexStateIsInQ[neighbourIndex] == False:
                     # Nu il am in coada, deci il pun
@@ -293,8 +298,8 @@ def astarStrategy():
     indexOfFinalState = ([index for (index, state) in enumerate(states) if state.c2 ==
                           c and state.m2 == m and state.pb == 2])[0]
     if d[indexOfFinalState] != math.inf:
-        print(f'Am gasit o rezolvare cu lungime {d[indexOfFinalState]}')
-        print('A fost traseu, mai exact:')
+        # print(f'Am gasit o rezolvare cu lungime {d[indexOfFinalState]}')
+        # print('A fost traseu, mai exact:')
         traseu = [indexOfFinalState]
         currentStateIndex = indexOfFinalState
 
@@ -304,21 +309,50 @@ def astarStrategy():
                     traseu.append(neighbourIndex)
                     currentStateIndex = neighbourIndex
                     break
+        # for index in traseu[::-1]:
+        #     print(states[index])
+        # print(f'Am trecut print {len(traseu)} stari')
+        # print(traseu[::-1])
+        statesTraversed = []
         for index in traseu[::-1]:
-            print(states[index])
+            statesTraversed.append(states[index])
+            return statesTraversed
     else:
-        print('A* did not find a solution :(')
+        # print('A* did not find a solution :(')
+        return None
+
+
+def timeFunction(function):
+    # start = timeit.timeit()
+    start = time.time()
+    states = function()
+    # end = timeit.timeit()
+    end = time.time()
+    # print (f'Execution took {(end-start)*1000} milliseconds')
+    return end-start
 
 
 def main():
-    print('\nRandom Strategy:')
-    randomStrategy()
-    print('\nBacktracking Strategy:')
-    solveWithBacktrackingStrategy()
-    print('\nIDDFS Strategy:')
-    solveWithIDDFSStrategy()
-    print ('\nA* Strategy:')
-    astarStrategy()
+    global c, m
+    astarTime = 0
+    noOfIterations = 100
+    for i in range(0, noOfIterations):
+        m = random.randint(3, 4)
+        c = random.randint(3, m)
+        cb = random.randint(2, 5)
+        c, m, cb = 7, 14, 4
+        # c, m, cb = 3, 3, 5
+        # print(f'\n\nSolving for c: {c}, m: {m}, capacity: {cb}')
+        # print('\nRandom Strategy:')
+        # randomStrategy()
+        # print('\nBacktracking Strategy:')
+        # solveWithBacktrackingStrategy()
+        # print('\nA* Strategy:')
+        astarTime += timeFunction(astarStrategy)
+        # print('\nIDDFS Strategy:')
+        # solveWithIDDFSStrategy()
+    print(
+        f'A* took, on average, {astarTime * 1000 / noOfIterations} milliseconds')
 
 
 main()
