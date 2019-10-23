@@ -127,7 +127,7 @@ def backtrackingStrategy(state, statesTraversed=[], done=[False]):
 
     if state.isFinal():
         done[0] = True
-        return
+        return statesTraversed
 
     for newState in states:
         if newState.visited == True:
@@ -324,7 +324,7 @@ def main():
 
     functions = [randomStrategy, solveWithBacktrackingStrategy,
                  solveWithIDDFSStrategy, astarStrategy]
-    # functions = [astarStrategy]
+    # functions = [solveWithBacktrackingStrategy]
     times = {}
     lengths = {}
     noOfSolutionsFound = {}
@@ -352,13 +352,13 @@ def main():
         print(
             f'{function.__name__} found {noOfSolutionsFound[function]}/{noOfIterations} solutions')
         print(
-            f'{function} took on average, {times[function] * 1000 / noOfIterations} milliseconds')
+            f'{function.__name__} took on average, {times[function] * 1000 / noOfIterations} milliseconds')
         if noOfSolutionsFound[function] == 0:
             print(f'{function.__name__} did not find any solution at all :(')
         else:
             print(
                 f'{function.__name__} had an average length of {lengths[function] / noOfSolutionsFound[function]}')
-        print ('')
+        print('')
 
 
 main()

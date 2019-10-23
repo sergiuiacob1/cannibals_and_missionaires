@@ -1,2 +1,2 @@
-xOfFinalState] != math.inf:
-        #     break
+y, solveWithBacktrackingStrategy,
+                 solveWithIDDF
