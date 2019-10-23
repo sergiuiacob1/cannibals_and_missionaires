@@ -1,13 +1,12 @@
 import random
 import math
-import timeit
 import time
 
 c = 3
 m = 3
 cb = 2
 randomStrategyIterations = 10
-noOfTransitionsWithoutSuccess = 10
+noOfTransitionsWithoutSuccess = 100
 maxTreeDepth = 999
 
 
@@ -90,10 +89,9 @@ def getRandomTransition(State):
 
 def randomStrategy():
     states = buildPossibleStates()
-    print(f'I have a total of {len(states)} states')
 
     for i in range(randomStrategyIterations):
-        print(f'Iteration {i}...')
+        # print(f'Iteration {i}...')
         # Iau o referinta direct catre acel obiect din states
         # O noua iteratie, setez toate visited pe False
         for state in states:
@@ -115,27 +113,11 @@ def randomStrategy():
             stateInStatesList.visited = True
             statesTraversed.append(stateInStatesList)
             currentState = stateInStatesList
-            # randomState = random.choice(states)
-            # if randomState.visited == True:
-            #     continue
-            # # Incerc sa vad daca am tranzitie catre starea asta
-            # transition = buildTransitionBetweenStates(
-            #     currentState, randomState)
-            # if isTransitionValid(transition):
-            #     # woo!
-            #     statesTraversed.append(randomState)
-            #     currentState = randomState
 
             if currentState.isFinal() == True:
-                print('Found solution with random strategy:')
-                for state in statesTraversed:
-                    print(state)
-                # print("Resolved at iteration ", i+1, " -> c1: ", currentState.c1,
-                #       ", m1: ", currentState.m1, ", c2: ", currentState.c2, ", m2: ", currentState.m2, ", pb: ", currentState.pb)
-                return
+                return statesTraversed
 
-    if currentState.isFinal() == False:
-        print("Nu s-a gasit nicio rezolvare cu random :(")
+    return None
 
 
 def backtrackingStrategy(state, statesTraversed=[], done=[False]):
@@ -144,10 +126,7 @@ def backtrackingStrategy(state, statesTraversed=[], done=[False]):
     state.visited = True
 
     if state.isFinal():
-        print(f'Reached a final state: {state}')
         done[0] = True
-
-    if done[0] == True:
         return
 
     for newState in states:
@@ -210,12 +189,10 @@ def solveWithBacktrackingStrategy():
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
     statesTraversed = backtrackingStrategy(initialState, [initialState])
-    if statesTraversed is not None:
-        if statesTraversed[-1].isFinal():
-            for state in statesTraversed:
-                print(state)
-    else:
-        print('Backtracking did not find a solution :(')
+    if statesTraversed is not None and statesTraversed[-1].isFinal():
+        return statesTraversed
+
+    return None
 
 
 def solveWithIDDFSStrategy():
@@ -230,12 +207,9 @@ def solveWithIDDFSStrategy():
         statesTraversed = [indexOfInitialState]
         DFS(i, indexOfInitialState, statesTraversed)
         if states[statesTraversed[-1]].isFinal():
-            print(f'Reached final state with limit: {i}')
-            for stateIndex in statesTraversed:
-                print(states[stateIndex])
-            return
+            return statesTraversed
 
-    print('IDDFS did not find a solution :(')
+    return None
 
 
 def DFS(limit, stateIndex, statesTraversed, done=[False]):
@@ -263,13 +237,17 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
 
 
 def heuristic(state, finalState=State(0, 0, c, m, 2)):
-    return 0
+    # return 0
+    return (state.c1 + state.m1)/2
+    return state.c2 + state.m2
     return (state.c1 + state.m1)//cb
 
 
 def astarStrategy():
     states = buildPossibleStates()
     M = buildEdgesBetweenStates(states)
+    indexOfFinalState = ([index for (index, state) in enumerate(states) if state.c2 ==
+                          c and state.m2 == m and state.pb == 2])[0]
     d = [math.inf] * len(states)
     indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
                             c and state.m1 == m and state.pb == 1])[0]
@@ -282,6 +260,10 @@ def astarStrategy():
         # scot urmatorul element din coada
         currentStateIndex = Q.pop()
         indexStateIsInQ[currentStateIndex] = False
+
+        if d[indexOfFinalState] != math.inf:
+            break
+
         for neighbourIndex in M[currentStateIndex]:
             # fac update la vecini
             if d[currentStateIndex] + 1 < d[neighbourIndex]:
@@ -295,8 +277,6 @@ def astarStrategy():
         sorted(Q, key=lambda x: d[x] + heuristic(states[x]))
         # min heap pentru bonus
 
-    indexOfFinalState = ([index for (index, state) in enumerate(states) if state.c2 ==
-                          c and state.m2 == m and state.pb == 2])[0]
     if d[indexOfFinalState] != math.inf:
         # print(f'Am gasit o rezolvare cu lungime {d[indexOfFinalState]}')
         # print('A fost traseu, mai exact:')
@@ -313,46 +293,70 @@ def astarStrategy():
         #     print(states[index])
         # print(f'Am trecut print {len(traseu)} stari')
         # print(traseu[::-1])
-        statesTraversed = []
-        for index in traseu[::-1]:
-            statesTraversed.append(states[index])
-            return statesTraversed
+        statesTraversed = list(map(lambda x: states[x], traseu[::-1]))
+        return statesTraversed
     else:
         # print('A* did not find a solution :(')
         return None
 
 
 def timeFunction(function):
-    # start = timeit.timeit()
     start = time.time()
     states = function()
-    # end = timeit.timeit()
+    if states is not None:
+        length = len(states)
+        print(f'{function} found a solution with a length of {length}')
+        # for state in states:
+        #     print(state)
+    else:
+        print(f'{function} did not find a solution')
+        length = None
     end = time.time()
     # print (f'Execution took {(end-start)*1000} milliseconds')
-    return end-start
+    return end-start, length
 
 
 def main():
     global c, m
     astarTime = 0
+    randomTime = 0
+    backtrackingTime = 0
+    IDDFSTime = 0
     noOfIterations = 100
+
+    functions = [randomStrategy, solveWithBacktrackingStrategy,
+                 astarStrategy]
+    times = {}
+    lengths = {}
+    noOfSolutionsFound = {}
+    for function in functions:
+        times[function] = 0
+        lengths[function] = 0
+        noOfSolutionsFound[function] = 0
+
     for i in range(0, noOfIterations):
-        m = random.randint(3, 4)
+        m = random.randint(3, 15)
         c = random.randint(3, m)
         cb = random.randint(2, 5)
-        c, m, cb = 7, 14, 4
-        # c, m, cb = 3, 3, 5
-        # print(f'\n\nSolving for c: {c}, m: {m}, capacity: {cb}')
-        # print('\nRandom Strategy:')
-        # randomStrategy()
-        # print('\nBacktracking Strategy:')
-        # solveWithBacktrackingStrategy()
-        # print('\nA* Strategy:')
-        astarTime += timeFunction(astarStrategy)
-        # print('\nIDDFS Strategy:')
-        # solveWithIDDFSStrategy()
-    print(
-        f'A* took, on average, {astarTime * 1000 / noOfIterations} milliseconds')
+        # c, m, cb = 7, 14, 4
+
+        for function in functions:
+            functionTime, functionLength = timeFunction(function)
+            times[function] += functionTime
+            if functionLength is not None:
+                # a gasit solutie
+                lengths[function] += functionLength
+                noOfSolutionsFound[function] += 1
+
+    print('\n')
+    for function in functions:
+        print(
+            f'{function} took on average, {times[function] * 1000 / noOfIterations} milliseconds')
+        if noOfSolutionsFound[function] == 0:
+            print(f'{function} did not find any solution at all :(')
+        else:
+            print(
+                f'{function} had an average length of {lengths[function] / noOfSolutionsFound[function]}')
 
 
 main()
