@@ -88,7 +88,7 @@ def getRandomTransition(State):
 
 
 def randomStrategy():
-    states = buildPossibleStates()
+    # states = buildPossibleStates()
 
     for i in range(randomStrategyIterations):
         # print(f'Iteration {i}...')
@@ -184,7 +184,7 @@ def buildEdgesBetweenStates(states):
 
 def solveWithBacktrackingStrategy():
     global states
-    states = buildPossibleStates()
+    # states = buildPossibleStates()
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
     initialState.visited = True
@@ -198,8 +198,8 @@ def solveWithBacktrackingStrategy():
 
 def solveWithIDDFSStrategy():
     global states, M
-    states = buildPossibleStates()
-    M = buildEdgesBetweenStates(states)
+    # states = buildPossibleStates()
+    # M = buildEdgesBetweenStates(states)
     indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
                             c and state.m1 == m and state.pb == 1])[0]
 
@@ -247,8 +247,8 @@ def heuristic(state, finalState=State(0, 0, c, m, 2)):
 
 
 def astarStrategy():
-    states = buildPossibleStates()
-    M = buildEdgesBetweenStates(states)
+    # states = buildPossibleStates()
+    # M = buildEdgesBetweenStates(states)
     indexOfFinalState = ([index for (index, state) in enumerate(states) if state.c2 ==
                           c and state.m2 == m and state.pb == 2])[0]
     d = [math.inf] * len(states)
@@ -321,7 +321,7 @@ def timeFunction(function):
 
 
 def main():
-    global c, m
+    global c, m, states, M
     noOfIterations = 10
 
     functions = [randomStrategy, solveWithBacktrackingStrategy,
@@ -339,10 +339,12 @@ def main():
         m = random.randint(3, 15)
         c = random.randint(3, m)
         cb = random.randint(2, 5)
-        # c, m, cb = 7, 14, 4
-        # c, m, cb = 13, 13, 2
+        states = buildPossibleStates()
+        M = buildEdgesBetweenStates(states)
 
         for function in functions:
+            for state in states:
+                state.visited=False
             functionTime, functionLength = timeFunction(function)
             times[function] += functionTime
             if functionLength is not None:
