@@ -205,29 +205,29 @@ def solveWithIDDFSStrategy():
     states[indexOfInitialState].visited = True
     for i in range(1, maxTreeDepth):
         statesTraversed = [indexOfInitialState]
-        DFS(i, indexOfInitialState, statesTraversed)
+        DLS(i, indexOfInitialState, statesTraversed)
         if states[statesTraversed[-1]].isFinal():
             return statesTraversed
 
     return None
 
 
-def DFS(limit, stateIndex, statesTraversed, done=[False]):
+def DLS(limit, stateIndex, statesTraversed, done=[False]):
     global states, M
 
     if states[stateIndex].isFinal():
-        print('Reached final state')
         done[0] = True
+        print(f'IDDFS needs a limit of {-limit}')
         return
 
-    if limit == 0:
-        return
+    # if limit == 0:
+    #     return
 
     for neighbourIndex in M[stateIndex]:
         if states[neighbourIndex].visited == False:
             states[neighbourIndex].visited = True
             statesTraversed.append(neighbourIndex)
-            DFS(limit - 1, neighbourIndex, statesTraversed, done)
+            DLS(limit - 1, neighbourIndex, statesTraversed, done)
 
             if done[0] == True:
                 return
@@ -237,10 +237,12 @@ def DFS(limit, stateIndex, statesTraversed, done=[False]):
 
 
 def heuristic(state, finalState=State(0, 0, c, m, 2)):
+    return (state.c1 + state.m1)//cb + (state.c1 + state.m1)//(cb*2)
     # return 0
-    return (state.c1 + state.m1)/2
+    # if state.pb == 1:
+    #     return state.c1 + state.m1 - 1
+    # return state.c1 + state.m1
     return state.c2 + state.m2
-    return (state.c1 + state.m1)//cb
 
 
 def astarStrategy():
@@ -324,8 +326,9 @@ def main():
     IDDFSTime = 0
     noOfIterations = 100
 
-    functions = [randomStrategy, solveWithBacktrackingStrategy,
-                 astarStrategy]
+    # functions = [randomStrategy, solveWithBacktrackingStrategy,
+    #              astarStrategy]
+    functions = [astarStrategy]
     times = {}
     lengths = {}
     noOfSolutionsFound = {}
@@ -338,7 +341,7 @@ def main():
         m = random.randint(3, 15)
         c = random.randint(3, m)
         cb = random.randint(2, 5)
-        # c, m, cb = 7, 14, 4
+        c, m, cb = 7, 14, 4
 
         for function in functions:
             functionTime, functionLength = timeFunction(function)
