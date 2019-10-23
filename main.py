@@ -263,8 +263,8 @@ def astarStrategy():
         currentStateIndex = Q.pop()
         indexStateIsInQ[currentStateIndex] = False
 
-        if d[indexOfFinalState] != math.inf:
-            break
+        # if d[indexOfFinalState] != math.inf:
+        #     break
 
         for neighbourIndex in M[currentStateIndex]:
             # fac update la vecini
@@ -307,11 +307,11 @@ def timeFunction(function):
     states = function()
     if states is not None:
         length = len(states)
-        print(f'{function} found a solution with a length of {length}')
+        print(f'{function.__name__} found a solution with a length of {length}')
         # for state in states:
         #     print(state)
     else:
-        print(f'{function} did not find a solution')
+        print(f'{function.__name__} did not find a solution')
         length = None
     end = time.time()
     # print (f'Execution took {(end-start)*1000} milliseconds')
@@ -320,15 +320,11 @@ def timeFunction(function):
 
 def main():
     global c, m
-    astarTime = 0
-    randomTime = 0
-    backtrackingTime = 0
-    IDDFSTime = 0
-    noOfIterations = 100
+    noOfIterations = 10
 
-    # functions = [randomStrategy, solveWithBacktrackingStrategy,
-    #              astarStrategy]
-    functions = [astarStrategy]
+    functions = [randomStrategy, solveWithBacktrackingStrategy,
+                 solveWithIDDFSStrategy, astarStrategy]
+    # functions = [astarStrategy]
     times = {}
     lengths = {}
     noOfSolutionsFound = {}
@@ -341,7 +337,7 @@ def main():
         m = random.randint(3, 15)
         c = random.randint(3, m)
         cb = random.randint(2, 5)
-        c, m, cb = 7, 14, 4
+        # c, m, cb = 7, 14, 4
 
         for function in functions:
             functionTime, functionLength = timeFunction(function)
@@ -351,15 +347,18 @@ def main():
                 lengths[function] += functionLength
                 noOfSolutionsFound[function] += 1
 
-    print('\n')
+    print('\n\n')
     for function in functions:
+        print(
+            f'{function.__name__} found {noOfSolutionsFound[function]}/{noOfIterations} solutions')
         print(
             f'{function} took on average, {times[function] * 1000 / noOfIterations} milliseconds')
         if noOfSolutionsFound[function] == 0:
-            print(f'{function} did not find any solution at all :(')
+            print(f'{function.__name__} did not find any solution at all :(')
         else:
             print(
-                f'{function} had an average length of {lengths[function] / noOfSolutionsFound[function]}')
+                f'{function.__name__} had an average length of {lengths[function] / noOfSolutionsFound[function]}')
+        print ('')
 
 
 main()
