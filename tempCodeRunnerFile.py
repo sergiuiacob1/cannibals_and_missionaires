@@ -1,2 +1,2 @@
-y, solveWithBacktrackingStrategy,
-                 solveWithIDDF
+rackingStrategy,
+                 solveWithIDDFSStrategy, astarS

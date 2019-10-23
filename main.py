@@ -23,9 +23,9 @@ class State:
         return self.c1 == 0 and self.m1 == 0
 
     def isValid(self):
-        if self.pb == 1 and (self.c1 + self.m1 <= 0):
+        if self.pb == 1 and (self.c1 + self.m1) <= 0:
             return False
-        if self.pb == 2 and (self.c2 + self.m2 <= 0):
+        if self.pb == 2 and (self.c2 + self.m2) <= 0:
             return False
         return (self.c1 <= self.m1 or self.m1 == 0) and (self.c2 <= self.m2 or self.m2 == 0) and (self.c1 + self.c2 == c and self.m1 + self.m2 == m)
 
@@ -120,24 +120,23 @@ def randomStrategy():
     return None
 
 
-def backtrackingStrategy(state, statesTraversed=[], done=[False]):
+def backtrackingStrategy(state, statesTraversed, done):
     global states
-
-    state.visited = True
 
     if state.isFinal():
         done[0] = True
-        return statesTraversed
+        return
 
     for newState in states:
         if newState.visited == True:
             continue
         transition = buildTransitionBetweenStates(state, newState)
         if isTransitionValid(transition):
+            newState.visited = True
             statesTraversed.append(newState)
             backtrackingStrategy(newState, statesTraversed, done)
             if (done[0] == True):
-                return statesTraversed
+                return
             statesTraversed.pop(len(statesTraversed) - 1)
             newState.visited = False
 
@@ -188,8 +187,10 @@ def solveWithBacktrackingStrategy():
     states = buildPossibleStates()
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
-    statesTraversed = backtrackingStrategy(initialState, [initialState])
-    if statesTraversed is not None and statesTraversed[-1].isFinal():
+    initialState.visited = True
+    statesTraversed = [initialState]
+    backtrackingStrategy(initialState, statesTraversed, [False])
+    if len(statesTraversed) > 1:
         return statesTraversed
 
     return None
@@ -205,14 +206,14 @@ def solveWithIDDFSStrategy():
     states[indexOfInitialState].visited = True
     for i in range(1, maxTreeDepth):
         statesTraversed = [indexOfInitialState]
-        DLS(i, indexOfInitialState, statesTraversed)
+        DLS(i, indexOfInitialState, statesTraversed, [False])
         if states[statesTraversed[-1]].isFinal():
             return statesTraversed
 
     return None
 
 
-def DLS(limit, stateIndex, statesTraversed, done=[False]):
+def DLS(limit, stateIndex, statesTraversed, done):
     global states, M
 
     if states[stateIndex].isFinal():
@@ -307,7 +308,8 @@ def timeFunction(function):
     states = function()
     if states is not None:
         length = len(states)
-        print(f'{function.__name__} found a solution with a length of {length}')
+        print(
+            f'{function.__name__} found a solution with a length of {length} for c={c}, m={m}, cb={cb}')
         # for state in states:
         #     print(state)
     else:
@@ -338,6 +340,7 @@ def main():
         c = random.randint(3, m)
         cb = random.randint(2, 5)
         # c, m, cb = 7, 14, 4
+        # c, m, cb = 13, 13, 2
 
         for function in functions:
             functionTime, functionLength = timeFunction(function)
