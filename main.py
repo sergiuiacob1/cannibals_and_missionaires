@@ -1,7 +1,8 @@
 import random
+import math
 
-c = 3
-m = 3
+c = 6
+m = 6
 cb = 2
 randomStrategyIterations = 10
 noOfTransitionsWithoutSuccess = 10
@@ -131,7 +132,7 @@ def randomStrategy():
                 return
 
     if currentState.isFinal() == False:
-        print("Nu s-a gasit nicio rezolvare!\n")
+        print("Nu s-a gasit nicio rezolvare cu random :(")
 
 
 def backtrackingStrategy(state, statesTraversed=[], done=[False]):
@@ -228,11 +229,13 @@ def solveWithBacktrackingStrategy():
     states = buildPossibleStates()
     initialState = ([state for state in states if state.c1 ==
                      c and state.m1 == m and state.pb == 1])[0]
-    print(f'Initial state: {initialState}')
     statesTraversed = backtrackingStrategy(initialState, [initialState])
-    if statesTraversed[-1].isFinal():
-        for state in statesTraversed:
-            print(state)
+    if statesTraversed is not None:
+        if statesTraversed[-1].isFinal():
+            for state in statesTraversed:
+                print(state)
+    else:
+        print('Backtracking did not find a solution :(')
 
 
 def solveWithIDDFSStrategy():
@@ -249,16 +252,73 @@ def solveWithIDDFSStrategy():
             print(f'Reached final state with limit: {i}')
             for state in statesTraversed:
                 print(state)
-            break
+            return
+
+    print('IDDFS did not find a solution :(')
+
+
+def heuristic(state, finalState=State(0, 0, c, m, 2)):
+    return 0
+    # ceva mai destept
+
+
+def astarStrategy():
+    states = buildPossibleStates()
+    M = buildEdgesBetweenStates(states)
+    d = [math.inf] * len(states)
+    indexOfInitialState = ([index for (index, state) in enumerate(states) if state.c1 ==
+                            c and state.m1 == m and state.pb == 1])[0]
+    d[indexOfInitialState] = 0
+    Q = [indexOfInitialState]
+    indexStateIsInQ = [False] * len(states)
+    indexStateIsInQ[indexOfInitialState] = True
+
+    while len(Q) > 0:
+        # scot urmatorul element din coada
+        currentStateIndex = Q.pop()
+        indexStateIsInQ[currentStateIndex] = False
+        for neighbourIndex in M[currentStateIndex]:
+            # fac update la vecini
+            if d[currentStateIndex] + 1 <= d[neighbourIndex]:
+                d[neighbourIndex] = d[currentStateIndex] + 1
+                if indexStateIsInQ[neighbourIndex] == False:
+                    # Nu il am in coada, deci il pun
+                    Q.append(neighbourIndex)
+                    indexStateIsInQ[neighbourIndex] = True
+
+        # sortez Q
+        sorted(Q, key=lambda x: d[x] + heuristic(states[x]))
+        # min heap pentru bonus
+
+    indexOfFinalState = ([index for (index, state) in enumerate(states) if state.c2 ==
+                          c and state.m2 == m and state.pb == 2])[0]
+    if d[indexOfFinalState] != math.inf:
+        print(f'Am gasit o rezolvare cu lungime {d[indexOfFinalState]}')
+        print('A fost traseu, mai exact:')
+        traseu = [indexOfFinalState]
+        currentStateIndex = indexOfFinalState
+
+        while d[currentStateIndex] > 0:
+            for neighbourIndex in M[currentStateIndex]:
+                if d[currentStateIndex] == d[neighbourIndex] + 1:
+                    traseu.append(neighbourIndex)
+                    currentStateIndex = neighbourIndex
+                    break
+        for index in traseu[::-1]:
+            print(states[index])
+    else:
+        print('A* did not find a solution :(')
 
 
 def main():
-    print('Random Strategy: \n')
+    print('\nRandom Strategy:')
     randomStrategy()
-    # print('\nBacktracking Strategy: \n')
-    # solveWithBacktrackingStrategy()
-    # print('\nIDDFS Strategy: \n')
-    # solveWithIDDFSStrategy()
+    print('\nBacktracking Strategy:')
+    solveWithBacktrackingStrategy()
+    print('\nIDDFS Strategy:')
+    solveWithIDDFSStrategy()
+    print ('\nA* Strategy:')
+    astarStrategy()
 
 
 main()
